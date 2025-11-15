@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'task_form_screen.dart';
+import '../db/database_helper.dart';
+import '../models/task_item.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -16,28 +18,29 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Hardcoded sample items for Task 2 only.
-  final List<Map<String, String>> _items = [
-    {
-      'title': 'Buy milk',
-      'priority': 'High',
-      'description': '2 litres from store',
-    },
-    {
-      'title': 'Study Flutter',
-      'priority': 'Medium',
-      'description': 'Finish UI chapter',
-    },
-    {'title': 'Call John', 'priority': 'Low', 'description': 'Project sync up'},
-  ];
+  late Future<List<TaskItem>> _tasksFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  void _reload() {
+    _tasksFuture = DatabaseHelper.instance.getAllTasks();
+    setState(() {});
+  }
 
   Future<void> _addItem() async {
-    final newItem = await Navigator.of(context).push<Map<String, String>>(
+    final added = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const TaskFormScreen()),
     );
-    if (newItem != null) {
-      setState(() => _items.insert(0, newItem));
-    }
+    if (added == true) _reload();
+  }
+
+  Future<void> _deleteTask(int id) async {
+    await DatabaseHelper.instance.deleteTask(id);
+    _reload();
   }
 
   @override
@@ -62,17 +65,40 @@ class _HomeScreenState extends State<HomeScreen> {
             onChanged: widget.onThemeChanged,
           ),
           Expanded(
-            child: ListView.separated(
-              itemCount: _items.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final item = _items[index];
-                return ListTile(
-                  leading: const Icon(Icons.note_alt_outlined),
-                  title: Text(item['title'] ?? ''),
-                  subtitle: Text(
-                    '${item['priority']} • ${item['description']}',
-                  ),
+            child: FutureBuilder<List<TaskItem>>(
+              future: _tasksFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final items = snapshot.data ?? const <TaskItem>[];
+                if (items.isEmpty) {
+                  return const Center(child: Text('No tasks yet. Tap + to add.'));
+                }
+                return ListView.separated(
+                  itemCount: items.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final t = items[index];
+                    return Dismissible(
+                      key: ValueKey(t.id ?? index),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      onDismissed: (_) {
+                        if (t.id != null) _deleteTask(t.id!);
+                      },
+                      child: ListTile(
+                        leading: const Icon(Icons.note_alt_outlined),
+                        title: Text(t.title),
+                        subtitle: Text('${t.priority} • ${t.description}'),
+                      ),
+                    );
+                  },
                 );
               },
             ),

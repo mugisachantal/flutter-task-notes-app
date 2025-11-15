@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../db/database_helper.dart';
+import '../models/task_item.dart';
 
 class TaskFormScreen extends StatefulWidget {
   static const route = '/task-form';
@@ -21,13 +23,16 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    Navigator.of(context).pop({
-      'title': _titleCtrl.text.trim(),
-      'description': _descCtrl.text.trim(),
-      'priority': _priority,
-    });
+    final item = TaskItem(
+      title: _titleCtrl.text.trim(),
+      priority: _priority,
+      description: _descCtrl.text.trim(),
+      isCompleted: false,
+    );
+    await DatabaseHelper.instance.insertTask(item);
+    if (mounted) Navigator.of(context).pop(true);
   }
 
   @override
@@ -42,8 +47,12 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
             children: [
               TextFormField(
                 controller: _titleCtrl,
-                decoration: const InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Enter a title' : null,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Enter a title' : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
@@ -54,20 +63,26 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                   DropdownMenuItem(value: 'High', child: Text('High')),
                 ],
                 onChanged: (v) => setState(() => _priority = v ?? 'Low'),
-                decoration: const InputDecoration(labelText: 'Priority', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: 'Priority',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _descCtrl,
                 maxLines: 4,
-                decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: _submit,
                 icon: const Icon(Icons.save),
                 label: const Text('Submit'),
-              )
+              ),
             ],
           ),
         ),
