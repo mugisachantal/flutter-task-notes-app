@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'task_form_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool isDarkMode;
+  final ValueChanged<bool> onThemeChanged;
+
+  const HomeScreen({
+    super.key,
+    required this.isDarkMode,
+    required this.onThemeChanged,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -11,8 +18,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // Hardcoded sample items for Task 2 only.
   final List<Map<String, String>> _items = [
-    {'title': 'Buy milk', 'priority': 'High', 'description': '2 litres from store'},
-    {'title': 'Study Flutter', 'priority': 'Medium', 'description': 'Finish UI chapter'},
+    {
+      'title': 'Buy milk',
+      'priority': 'High',
+      'description': '2 litres from store',
+    },
+    {
+      'title': 'Study Flutter',
+      'priority': 'Medium',
+      'description': 'Finish UI chapter',
+    },
     {'title': 'Call John', 'priority': 'Low', 'description': 'Project sync up'},
   ];
 
@@ -41,6 +56,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+          SwitchListTile(
+            title: const Text('Dark Theme'),
+            value: widget.isDarkMode,
+            onChanged: widget.onThemeChanged,
+          ),
           Expanded(
             child: ListView.separated(
               itemCount: _items.length,
@@ -50,7 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 return ListTile(
                   leading: const Icon(Icons.note_alt_outlined),
                   title: Text(item['title'] ?? ''),
-                  subtitle: Text('${item['priority']} • ${item['description']}'),
+                  subtitle: Text(
+                    '${item['priority']} • ${item['description']}',
+                  ),
                 );
               },
             ),
