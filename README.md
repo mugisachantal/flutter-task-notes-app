@@ -1,16 +1,21 @@
-# task_notes_manager
+# Task Notes Manager
 
-A new Flutter project.
+A simple Flutter app to create, list, and manage tasks/notes locally. It demonstrates forms, navigation between two screens, dynamic lists, theme persistence with SharedPreferences, and local data storage with SQLite (sqflite).
 
-## Getting Started
+## Student Info
+- Name: Mugisa Joseph
+- Student Number: 2300700810
+- Reg. No: 23/U/0810
 
-This project is a starting point for a Flutter application.
+## Running the Project
+Use the following commands in your terminal:
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+flutter run
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+If targeting a specific device/platform, select a connected device (e.g., Windows desktop or Android) or pass a device id with `-d`.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+
